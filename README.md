@@ -76,6 +76,10 @@ go run ./cmd/server -port /dev/tty.usbmodem101 -addr :9000
 
 Completed sessions are saved as JSON files in the `sessions/` directory. The in-app session history panel loads them on demand.
 
+## Useful Links
+
+- [Mini4WDGeek.com](https://Mini4WDGeek.com) — Mini 4WD news, reviews, and resources
+
 ## Project Structure
 
 ```
