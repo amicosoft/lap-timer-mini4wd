@@ -159,8 +159,9 @@ function connect() {
 
 function render(state) {
   if (soundEnabled()) {
-    if (state.status === 'armed'   && prevStatus === 'idle')    playCountdown();
-    if (state.status === 'running' && prevStatus === 'armed')   playGo();
+    if (state.status === 'armed'     && prevStatus === 'idle')       playCountdown();
+    if (state.status === 'running'   && prevStatus === 'armed')      playGo();
+    if (state.status === 'running'   && prevStatus === 're-armed')   playGo();
     if (state.status === 'running' && state.lapNumber > prevLapCount) {
       if (state.bestLap < prevBestLap || prevBestLap === 0) playBestLap();
       else playLapBeep();
@@ -181,6 +182,7 @@ function render(state) {
       tickClock(sessionWall, now - (state.totalTime - completedTotal) * 1000);
       break;
     case 'paused':
+    case 're-armed':
       stopClock(
         formatTime(state.totalTime - completedTotal),
         formatTime(state.totalTime)
@@ -213,11 +215,12 @@ function render(state) {
 
 // Button definitions per status: [label, endpoint, style, soundFn]
 const BUTTON_SETS = {
-  idle:    [['Start', '/arm', 'btn-start', null]],
-  armed:   [['Stop', '/stop', 'btn-stop', playStop], ['Reset', '/reset', 'btn-reset', playReset]],
-  running: [['Pause', '/pause', 'btn-pause', playPause], ['Stop', '/stop', 'btn-stop', playStop]],
-  paused:  [['Resume', '/arm', 'btn-start', playResume], ['Reset Time', '/reset-time', 'btn-reset-time', playResetTime], ['Stop', '/stop', 'btn-stop', playStop]],
-  stopped: [['Reset', '/reset', 'btn-reset', playReset]],
+  idle:       [['Start', '/arm', 'btn-start', null]],
+  armed:      [['Stop', '/stop', 'btn-stop', playStop], ['Reset', '/reset', 'btn-reset', playReset]],
+  running:    [['Pause', '/pause', 'btn-pause', playPause], ['Stop', '/stop', 'btn-stop', playStop]],
+  paused:     [['Resume', '/arm', 'btn-start', playResume], ['Reset Time', '/reset-time', 'btn-reset-time', playResetTime], ['Stop', '/stop', 'btn-stop', playStop]],
+  're-armed': [['Stop', '/stop', 'btn-stop', playStop]],
+  stopped:    [['Reset', '/reset', 'btn-reset', playReset]],
 };
 
 function renderButtons(status) {

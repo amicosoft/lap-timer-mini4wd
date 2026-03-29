@@ -9,11 +9,12 @@ import (
 type Status string
 
 const (
-	StatusIdle    Status = "idle"    // initial, triggers ignored
-	StatusArmed   Status = "armed"   // waiting for first trigger
-	StatusRunning Status = "running" // clock ticking, triggers recorded
-	StatusPaused  Status = "paused"  // clock frozen, triggers ignored
-	StatusStopped Status = "stopped" // finished, results saved
+	StatusIdle     Status = "idle"      // initial, triggers ignored
+	StatusArmed    Status = "armed"     // waiting for first trigger
+	StatusRunning  Status = "running"   // clock ticking, triggers recorded
+	StatusPaused   Status = "paused"    // clock frozen, triggers ignored
+	StatusReArmed  Status = "re-armed"  // waiting for car to pass before resuming
+	StatusStopped  Status = "stopped"   // finished, results saved
 )
 
 type State struct {
@@ -47,12 +48,8 @@ func (s *Session) Arm() State {
 	case StatusIdle:
 		s.status = StatusArmed
 	case StatusPaused:
-		// Resume: shift timers forward by the paused duration so elapsed time is correct
-		paused := time.Since(s.pauseStart)
-		s.startTime = s.startTime.Add(paused)
-		s.lastTrigger = s.lastTrigger.Add(paused)
-		s.pauseStart = time.Time{}
-		s.status = StatusRunning
+		// Wait for the car to pass before resuming — keep timers frozen
+		s.status = StatusReArmed
 	}
 	return s.buildState(time.Now())
 }
@@ -92,8 +89,8 @@ func (s *Session) ResetTime() State {
 func (s *Session) Stop() State {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.status == StatusRunning || s.status == StatusPaused {
-		if s.status == StatusPaused {
+	if s.status == StatusRunning || s.status == StatusPaused || s.status == StatusReArmed {
+		if s.status == StatusPaused || s.status == StatusReArmed {
 			// Resolve paused time before stopping
 			paused := time.Since(s.pauseStart)
 			s.startTime = s.startTime.Add(paused)
@@ -118,6 +115,13 @@ func (s *Session) RecordTrigger() State {
 		// First trigger: start the clock
 		s.startTime = now
 		s.lastTrigger = now
+		s.status = StatusRunning
+	case StatusReArmed:
+		// Car passed: shift race timer by pause duration, start a fresh lap from now
+		paused := now.Sub(s.pauseStart)
+		s.startTime = s.startTime.Add(paused)
+		s.lastTrigger = now
+		s.pauseStart = time.Time{}
 		s.status = StatusRunning
 	case StatusRunning:
 		lap := now.Sub(s.lastTrigger)
@@ -177,7 +181,7 @@ func (s *Session) buildState(now time.Time) State {
 	switch s.status {
 	case StatusStopped:
 		elapsed = s.stopTime
-	case StatusPaused:
+	case StatusPaused, StatusReArmed:
 		elapsed = s.pauseStart
 	default:
 		elapsed = now
