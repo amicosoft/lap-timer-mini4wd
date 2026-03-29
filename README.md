@@ -78,7 +78,7 @@ Completed sessions are saved as JSON files in the `sessions/` directory. The in-
 
 ## Useful Links
 
-- [Mini4WDGeek.com](https://Mini4WDGeek.com) — Mini 4WD news, reviews, and resources
+- [Mini4WDGeek.com](http://Mini4WDGeek.com) — Mini 4WD news, reviews, and resources
 
 ## Project Structure
 
