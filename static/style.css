@@ -35,6 +35,15 @@ footer {
   color: var(--muted);
 }
 
+footer a {
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+footer a:hover {
+  color: var(--text);
+}
+
 header {
   display: flex;
   align-items: center;
