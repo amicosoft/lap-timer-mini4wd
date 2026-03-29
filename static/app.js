@@ -137,19 +137,23 @@ function connect() {
   ws = new WebSocket(`ws://${location.host}/ws`);
 
   ws.onopen = () => {
-    els.dot.className = 'status-dot connected';
-    els.statusText.textContent = 'Connected';
     if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
   };
 
   ws.onmessage = (event) => {
-    try { render(JSON.parse(event.data)); }
-    catch (e) { console.error('parse error:', e); }
+    try {
+      const msg = JSON.parse(event.data);
+      if ('serialConnected' in msg) {
+        els.dot.className = 'status-dot ' + (msg.serialConnected ? 'connected' : 'sensor-disconnected');
+        els.statusText.textContent = msg.serialConnected ? 'Sensor connected' : 'Sensor disconnected';
+        if (msg.portName) updatePortSelect(msg.portName);
+      } else {
+        render(msg);
+      }
+    } catch (e) { console.error('parse error:', e); }
   };
 
   ws.onclose = ws.onerror = () => {
-    els.dot.className = 'status-dot disconnected';
-    els.statusText.textContent = 'Disconnected — reconnecting...';
     ws = null;
     reconnectTimer = setTimeout(connect, 2000);
   };
@@ -341,6 +345,7 @@ const settingsToggle  = document.getElementById('settings-toggle');
 const settingsPanel   = document.getElementById('settings-panel');
 const settingsChevron = document.getElementById('settings-chevron');
 const soundToggle     = document.getElementById('sound-toggle');
+const portSelect      = document.getElementById('port-select');
 
 soundToggle.checked = soundEnabled();
 
@@ -348,13 +353,51 @@ settingsToggle.addEventListener('click', () => {
   const open = !settingsPanel.classList.contains('hidden');
   settingsPanel.classList.toggle('hidden', open);
   settingsChevron.textContent = open ? '▼' : '▲';
+  if (!open) loadPorts();
 });
 
 soundToggle.addEventListener('change', () => {
   localStorage.setItem('soundEnabled', soundToggle.checked ? 'true' : 'false');
-  // Warm up AudioContext on first user interaction
   if (soundToggle.checked) getAudioCtx();
 });
+
+portSelect.addEventListener('change', () => {
+  fetch('/port', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ port: portSelect.value }),
+  }).catch(console.error);
+});
+
+function loadPorts() {
+  fetch('/ports')
+    .then(r => r.json())
+    .then(ports => {
+      const current = portSelect.value;
+      portSelect.innerHTML = '<option value="">Auto-discover</option>';
+      ports.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        if (p === current) opt.selected = true;
+        portSelect.appendChild(opt);
+      });
+    })
+    .catch(console.error);
+}
+
+function updatePortSelect(portName) {
+  // Mark the connected port as selected without reloading the whole list
+  for (const opt of portSelect.options) {
+    if (opt.value === portName) { opt.selected = true; return; }
+  }
+  // Port not in list yet — add it
+  const opt = document.createElement('option');
+  opt.value = portName;
+  opt.textContent = portName;
+  opt.selected = true;
+  portSelect.appendChild(opt);
+}
 
 renderButtons('idle');
 connect();

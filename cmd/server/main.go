@@ -5,6 +5,8 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"sync"
+	"sync/atomic"
 
 	"github.com/gorilla/websocket"
 
@@ -19,7 +21,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
-	portFlag := flag.String("port", "/dev/ttyUSB0", "serial port (e.g. /dev/tty.usbmodemXXXX or COM3)")
+	portFlag := flag.String("port", "", "serial port (leave empty for auto-discovery)")
 	addrFlag := flag.String("addr", ":8080", "HTTP listen address")
 	flag.Parse()
 
@@ -27,12 +29,49 @@ func main() {
 	h := hub.New()
 	go h.Run()
 
-	// Serial -> Session -> Broadcast
-	go serial.ReadLoop(*portFlag, 9600, func() {
-		state := sess.RecordTrigger()
-		data, _ := json.Marshal(state)
+	// --- Serial port state ---
+	var (
+		serialConnected atomic.Bool
+		currentPortMu   sync.RWMutex
+		currentPort     string // connected port name (empty when disconnected)
+		selectedPort    = *portFlag
+		selectedPortMu  sync.RWMutex
+	)
+
+	getSelectedPort := func() string {
+		selectedPortMu.RLock()
+		defer selectedPortMu.RUnlock()
+		return selectedPort
+	}
+
+	serialStatus := func() map[string]interface{} {
+		currentPortMu.RLock()
+		defer currentPortMu.RUnlock()
+		return map[string]interface{}{
+			"serialConnected": serialConnected.Load(),
+			"portName":        currentPort,
+		}
+	}
+
+	broadcastSerial := func(connected bool, portName string) {
+		serialConnected.Store(connected)
+		currentPortMu.Lock()
+		currentPort = portName
+		currentPortMu.Unlock()
+		data, _ := json.Marshal(serialStatus())
 		h.Broadcast(data)
-	})
+	}
+
+	// Serial -> Session -> Broadcast
+	go serial.ReadLoop(getSelectedPort, 9600,
+		func() {
+			state := sess.RecordTrigger()
+			data, _ := json.Marshal(state)
+			h.Broadcast(data)
+		},
+		func(portName string) { broadcastSerial(true, portName) },
+		func() { broadcastSerial(false, "") },
+	)
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
@@ -46,6 +85,9 @@ func main() {
 
 		state := sess.CurrentState()
 		if data, err := json.Marshal(state); err == nil {
+			conn.WriteMessage(websocket.TextMessage, data)
+		}
+		if data, err := json.Marshal(serialStatus()); err == nil {
 			conn.WriteMessage(websocket.TextMessage, data)
 		}
 
@@ -110,6 +152,38 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(records)
+	})
+
+	http.HandleFunc("/ports", func(w http.ResponseWriter, r *http.Request) {
+		ports, err := serial.ListPorts()
+		if err != nil {
+			http.Error(w, "failed to list ports", http.StatusInternalServerError)
+			return
+		}
+		if ports == nil {
+			ports = []string{}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ports)
+	})
+
+	http.HandleFunc("/port", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var body struct {
+			Port string `json:"port"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		selectedPortMu.Lock()
+		selectedPort = body.Port
+		selectedPortMu.Unlock()
+		log.Printf("serial: port changed to %q", body.Port)
+		w.WriteHeader(http.StatusOK)
 	})
 
 	log.Printf("Lap timer server listening on %s", *addrFlag)

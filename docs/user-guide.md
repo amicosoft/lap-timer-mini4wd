@@ -163,7 +163,7 @@ Past sessions are stored and accessible via the **Session History** panel at the
 
 The indicator in the top-right corner shows the live connection to the server:
 
-![Connected indicator](images/ir-connected.png)
+![Connected indicator](images/sensor-connected.png)
 
 - **Green dot** — connected, sensor active
 - **Red dot** — disconnected, attempting to reconnect automatically
