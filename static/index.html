@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini 4WD Lap Timer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Mini 4WD Lap Timer</h1>
+      <div class="status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Connecting...</span>
+      </div>
+    </header>
+
+    <div class="live-clock">
+      <div class="live-clock-label">Current Lap</div>
+      <div id="live-clock">0:00.0</div>
+      <div class="race-time-row">
+        <span class="race-time-label">Race</span>
+        <span id="race-time">0:00.0</span>
+      </div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="stat">
+        <div class="label">Total Time</div>
+        <div class="value" id="total-time">0:00.0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Lap</div>
+        <div class="value" id="lap-number">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Last Lap</div>
+        <div class="value" id="last-lap">-.--s</div>
+      </div>
+      <div class="stat best">
+        <div class="label">Best Lap</div>
+        <div class="value" id="best-lap">-.--s</div>
+      </div>
+    </div>
+
+    <div class="lap-history">
+      <h2>Lap History</h2>
+      <ol id="lap-list">
+        <li class="placeholder">Waiting for first car...</li>
+      </ol>
+    </div>
+
+    <div class="actions" id="actions"></div>
+
+    <div class="settings-section">
+      <button class="section-toggle" id="settings-toggle">
+        <span>Settings</span>
+        <span id="settings-chevron">▼</span>
+      </button>
+      <div id="settings-panel" class="hidden">
+        <label class="setting-row">
+          <span>Race sounds</span>
+          <input type="checkbox" id="sound-toggle">
+        </label>
+      </div>
+    </div>
+
+    <div class="past-sessions">
+      <button class="section-toggle" id="history-toggle">
+        <span>Session History</span>
+        <span id="history-chevron">▼</span>
+      </button>
+      <div id="history-panel" class="hidden">
+        <div id="history-list"><span class="placeholder">No sessions saved yet.</span></div>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; <span id="copyright-year"></span> Mini4WDValley.com</p>
+    </footer>
+  </div>
+
+  <script src="app.js?v=10"></script>
+  <script>
+    const y = new Date().getFullYear();
+    document.getElementById('copyright-year').textContent = y > 2026 ? `2026–${y}` : '2026';
+  </script>
+</body>
+</html>
