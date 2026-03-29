@@ -1,0 +1,16 @@
+# Sessions data
+sessions/*.json
+
+# Go build output
+/server
+/lap-timer
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Arduino IDE
+arduino/lap_sensor/build/

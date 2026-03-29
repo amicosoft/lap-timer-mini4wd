@@ -24,35 +24,37 @@ Shows the total time elapsed for the entire race session, excluding any paused t
 
 ![Scoreboard display](images/scoreboard.png)
 
-Field
-
-Location
-
-Description
-
-**Total Time**
-
-Top left
-
-Sum of all completed laps
-
-**Lap**
-
-Top right
-
-Number of completed laps
-
-**Last Lap**
-
-Bottom left
-
-Time of the most recently completed lap
-
-**Best Lap**
-
-Bottom right
-
-Fastest lap of the session — highlighted in gold
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Location</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Total Time</strong></td>
+      <td>Top left</td>
+      <td>Sum of all completed laps</td>
+    </tr>
+    <tr>
+      <td><strong>Lap</strong></td>
+      <td>Top right</td>
+      <td>Number of completed laps</td>
+    </tr>
+    <tr>
+      <td><strong>Last Lap</strong></td>
+      <td>Bottom left</td>
+      <td>Time of the most recently completed lap</td>
+    </tr>
+    <tr>
+      <td><strong>Best Lap</strong></td>
+      <td>Bottom right</td>
+      <td>Fastest lap of the session — highlighted in gold</td>
+    </tr>
+  </tbody>
+</table>
 
 ### Lap History
 
@@ -92,45 +94,52 @@ Clears all lap data and returns the timer to idle. The session is saved to histo
 
 Sounds can be toggled on or off in the **Settings** panel at the bottom of the page. The preference is saved between sessions.
 
-Event
-
-Sound
-
-Start armed
-
-3 short beeps (countdown)
-
-Car crosses start line
-
-Rising two-note GO burst
-
-Lap completed
-
-Bell ping
-
-New best lap
-
-Ascending arpeggio (C–E–G–C)
-
-Pause
-
-Descending two-tone
-
-Resume clicked
-
-Rising two-tone
-
-Stop
-
-Low descending blip
-
-Reset Time
-
-Soft tick
-
-Reset
-
-Descending arpeggio
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Event</th>
+      <th>Sound</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Start armed</td>
+      <td>3 short beeps (countdown)</td>
+    </tr>
+    <tr>
+      <td>Car crosses start line</td>
+      <td>Rising two-note GO burst</td>
+    </tr>
+    <tr>
+      <td>Lap completed</td>
+      <td>Bell ping</td>
+    </tr>
+    <tr>
+      <td>New best lap</td>
+      <td>Ascending arpeggio (C–E–G–C)</td>
+    </tr>
+    <tr>
+      <td>Pause</td>
+      <td>Descending two-tone</td>
+    </tr>
+    <tr>
+      <td>Resume clicked</td>
+      <td>Rising two-tone</td>
+    </tr>
+    <tr>
+      <td>Stop</td>
+      <td>Low descending blip</td>
+    </tr>
+    <tr>
+      <td>Reset Time</td>
+      <td>Soft tick</td>
+    </tr>
+    <tr>
+      <td>Reset</td>
+      <td>Descending arpeggio</td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 

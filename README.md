@@ -2,6 +2,17 @@
 
 A real-time lap timer for Mini 4WD racing, built with Go and vanilla JavaScript. An Arduino with an IR sensor detects each car pass and triggers lap recording via serial port. Results are broadcast live to the browser over WebSocket.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+| ![Lap Timer UI](docs/images/app.png) | ![Arduino & sensor on track](docs/images/track.jpg) |
+|:---:|:---:|
+
+<div align="center">
+
+### [📖 User Guide](docs/user-guide.md) &nbsp;&nbsp; [🔧 Arduino Setup](docs/arduino-setup.md)
+
+</div>
+
 ## Features
 
 -   Real-time current lap and total race time display
@@ -12,9 +23,8 @@ A real-time lap timer for Mini 4WD racing, built with Go and vanilla JavaScript.
 
 ## Requirements
 
--   Go 1.22+
+-   [Go 1.22+](https://go.dev/dl/)
 -   Arduino with IR sensor connected via USB serial
--   A browser
 
 ## Hardware Setup
 
@@ -34,23 +44,27 @@ Then open `http://localhost:8080` in a browser.
 
 ### Options
 
-Flag
-
-Default
-
-Description
-
-`-port`
-
-`/dev/ttyUSB0`
-
-Serial port the Arduino is connected to
-
-`-addr`
-
-`:8080`
-
-HTTP listen address
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Flag</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>-port</code></td>
+      <td><code>/dev/ttyUSB0</code></td>
+      <td>Serial port the Arduino is connected to</td>
+    </tr>
+    <tr>
+      <td><code>-addr</code></td>
+      <td><code>:8080</code></td>
+      <td>HTTP listen address</td>
+    </tr>
+  </tbody>
+</table>
 
 Example:
 
